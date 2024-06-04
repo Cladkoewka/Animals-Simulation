@@ -14,9 +14,46 @@ namespace CodeBase.Architecture
 
         public Field Field => _field;
 
+        public void Init()
+        {
+            SetAnimalsFood();
+            SubscribeAllFood();
+        }
+
+        private void SubscribeAllFood()
+        {
+            foreach (Food food in _foods) 
+                food.OnFoodCollect += MoveFood;
+        }
+
+        private void MoveFood(Food food)
+        {
+            
+            food.Cell.CellState = CellState.Empty;
+            Cell newCell = _field.RandomEmptyCell(food.Cell);
+
+            food.Cell = newCell;
+            food.transform.position = FoodSpawnPosition(newCell);
+        }
+
+
         private void Update()
         {
             Tick();
+        }
+
+        private void SetAnimalsFood()
+        {
+            foreach (Animal animal in _animals)
+            {
+                foreach (Food food in _foods)
+                {
+                    if (food.ID == animal.ID)
+                    {
+                        animal.Food = food;
+                    }
+                }
+            }
         }
 
         private void Tick()
@@ -27,6 +64,14 @@ namespace CodeBase.Architecture
             }
         }
 
+        private static Vector3 FoodSpawnPosition(Cell emptyCell)
+        {
+            Vector3 spawnPosition = emptyCell.WorldPosition;
+            float additionYPosition = 0.3f;
+            spawnPosition += new Vector3(0, additionYPosition, 0);
+            return spawnPosition;
+        }
+        
         public void SetField(Field field) => 
             _field = field;
 
@@ -35,10 +80,5 @@ namespace CodeBase.Architecture
 
         public void SetFood(Food[] foods) => 
             _foods = foods;
-        
-        public Food GetFood(int id)
-        {
-            return _foods[id];
-        }
     }
 }

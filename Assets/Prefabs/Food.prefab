@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3613513559011870855}
   - component: {fileID: 4968066620800980861}
   - component: {fileID: 1536844058944058458}
-  m_Layer: 6
+  m_Layer: 0
   m_Name: Food
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -102,9 +102,9 @@ SphereCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
-  m_Radius: 0.5
+  m_Radius: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &1536844058944058458
 MonoBehaviour:
@@ -118,3 +118,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0416ae728fe84551b6a653dac65785c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _particleSystemPrefab: {fileID: 8925806768972292642, guid: 7046f9487b6a7c646944b0e0db95c622, type: 3}

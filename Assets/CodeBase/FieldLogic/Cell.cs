@@ -15,10 +15,5 @@ namespace CodeBase.FieldLogic
             _worldPosition = worldPosition;
             CellState = cellState;
         }
-
-        public void PrintInfo()
-        {
-            Debug.Log($"{_worldPosition.x} - {_worldPosition.z}");
-        }
     }
 }

@@ -4,6 +4,5 @@ namespace CodeBase.FieldLogic
     {
         Empty,
         Food,
-        Animal
     }
 }

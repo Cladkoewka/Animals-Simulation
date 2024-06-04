@@ -12,24 +12,26 @@ namespace CodeBase.Architecture
         [SerializeField] private GameObject _fieldPrefab;
         [SerializeField] private GameObject _animalPrefab;
         [SerializeField] private GameObject _foodPrefab;
+        [SerializeField] private SimulationMenu _simulationMenu;
         
         private void Awake()
         {
             InitField();
-            InitFood();
             InitAnimals();
+            InitFood();
+            _simulation.Init();
+            _simulationMenu.Init();
         }
 
-
-
+        
         private void InitField()
         {
             GameObject fieldGameObject = Instantiate(_fieldPrefab);
 
             fieldGameObject.transform.localScale = FieldSize();
 
-            Field field = new Field(Constants.FieldSize);
-            
+            Field field = new Field();
+            field.InitField(Constants.FieldSize);
             
             _simulation.SetField(field);
         }
@@ -41,13 +43,10 @@ namespace CodeBase.Architecture
             for (int i = 0; i < Constants.AnimalsCount; i++)
             {
                 animals[i] = CreateNewAnimal();
-                animals[i].SetFood(_simulation.GetFood(i));
+                animals[i].SetSpeed(Constants.AnimalsSpeed);
             }
-                
             
             _simulation.SetAnimals(animals);
-            
-            
         }
 
         private void InitFood()
@@ -64,22 +63,58 @@ namespace CodeBase.Architecture
         {
             GameObject animalGameObject = Instantiate(_animalPrefab, AnimalSpawnPosition(), Quaternion.identity);
             Animal animal = animalGameObject.GetComponent<Animal>();
+            SetAnimal(animal);
+
+            return animal;
+        }
+
+        private void SetAnimal(Animal animal)
+        {
             int animalId = NewAnimalID();
             animal.ID = animalId;
-            animalGameObject.GetComponent<MeshRenderer>().material.color = ColorGenerator.GetColorForId(animalId);
+            animal.GetComponent<MeshRenderer>().material.color = ColorGenerator.GetColorForId(animalId);
+        }
+
+        private Vector3 AnimalSpawnPosition()
+        {
+            Vector3 spawnPosition = EmptyCell().WorldPosition;
+            float additionYPosition = 0.5f;
+            spawnPosition += new Vector3(0, additionYPosition, 0);
             
-            return animal;
+            return spawnPosition;
         }
 
         private Food CreateNewFood()
         {
-            GameObject foodGameObject = Instantiate(_foodPrefab, FoodSpawnPosition(), Quaternion.identity);
+            Cell emptyCell = EmptyCell();
+            emptyCell.CellState = CellState.Food;
+            GameObject foodGameObject = Instantiate(_foodPrefab, FoodSpawnPosition(emptyCell), Quaternion.identity);
             Food food = foodGameObject.GetComponent<Food>();
+            SetFood(food, emptyCell);
+            return food;
+        }
+
+        private void SetFood(Food food, Cell emptyCell)
+        {
+            food.Cell = emptyCell;
             int foodId = NewFoodID();
             food.ID = foodId;
-            foodGameObject.GetComponent<MeshRenderer>().material.color = ColorGenerator.GetColorForId(foodId);
+            food.GetComponent<MeshRenderer>().material.color = ColorGenerator.GetColorForId(foodId);
+        }
 
-            return food;
+        private static Vector3 FoodSpawnPosition(Cell emptyCell)
+        {
+            Vector3 spawnPosition = emptyCell.WorldPosition;
+            float additionYPosition = 0.3f;
+            spawnPosition += new Vector3(0, additionYPosition, 0);
+            return spawnPosition;
+        }
+
+        private Cell EmptyCell()
+        {
+            Field field = _simulation.Field;
+            Cell emptyCell = field.RandomEmptyCell();
+            return emptyCell;
         }
 
         private int NewFoodID() => 
@@ -88,39 +123,6 @@ namespace CodeBase.Architecture
         private int NewAnimalID() => 
             Constants.AnimalIDCounter++;
 
-        private Vector3 AnimalSpawnPosition()
-        {
-            Vector3 spawnPosition = AnimalSpawnCell().WorldPosition;
-            float additionYPosition = 0.5f;
-            spawnPosition += new Vector3(0, additionYPosition, 0);
-            
-            return spawnPosition;
-        }
-
-        private Vector3 FoodSpawnPosition()
-        {
-            Vector3 spawnPosition = FoodSpawnCell().WorldPosition;
-            float additionYPosition = 0.3f;
-            spawnPosition += new Vector3(0, additionYPosition, 0);
-            
-            return spawnPosition;
-        }
-
-        private Cell AnimalSpawnCell()
-        {
-            Field field = _simulation.Field;
-            Cell emptyCell = field.RandomEmptyCell();
-            emptyCell.CellState = CellState.Animal;
-            return emptyCell;
-        }
-
-        private Cell FoodSpawnCell()
-        {
-            Field field = _simulation.Field;
-            Cell emptyCell = field.RandomEmptyCell();
-            emptyCell.CellState = CellState.Food;
-            return emptyCell;
-        }
 
         private static Vector3 FieldSize()
         {

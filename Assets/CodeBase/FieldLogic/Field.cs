@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CodeBase.AnimalsLogic;
 using Unity.AI.Navigation;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -12,15 +13,21 @@ namespace CodeBase.FieldLogic
         
         private Cell[,] _field;
 
-        private void Start()
+        public void InitField(int fieldSize)
         {
-            _meshSurface.BuildNavMesh();
+            _field = new Cell[fieldSize, fieldSize];
+
+            InitCells(fieldSize);
         }
 
-        public Field(int fieldSize)
+        public void Build() => 
+            _meshSurface.BuildNavMesh();
+
+        private void Start()
         {
-            InitField(fieldSize);
+            Build();
         }
+
 
         public Cell RandomEmptyCell()
         {
@@ -40,11 +47,31 @@ namespace CodeBase.FieldLogic
             else
                 return null;
         }
-        private void InitField(int fieldSize)
-        {
-            _field = new Cell[fieldSize, fieldSize];
 
-            InitCells(fieldSize);
+        public Cell RandomEmptyCell(Cell currentCell)
+        {
+            List<Cell> emptyCells = new List<Cell>();
+
+            foreach (var cell in _field)
+            {
+                if (IsCellAvaliable(cell, currentCell)) 
+                    emptyCells.Add(cell);
+            }
+
+            if (emptyCells.Count > 0)
+            {
+                int randomIndex = Random.Range(0, emptyCells.Count);
+                return emptyCells[randomIndex];
+            }
+            else
+                return null;
+        }
+
+        private static bool IsCellAvaliable(Cell cell, Cell currentCell)
+        {
+            return 
+                cell.CellState == CellState.Empty && 
+                Vector3.Distance(cell.WorldPosition, currentCell.WorldPosition) <= Constants.AnimalsSpeed * 5;
         }
 
         private void InitCells(int fieldSize)
@@ -67,14 +94,6 @@ namespace CodeBase.FieldLogic
             float worldY = 0;
 
             return new Vector3(worldX, worldY, worldZ);
-        }
-
-        public void PrintInfo()
-        {
-            foreach (var cell in _field)
-            {
-                cell.PrintInfo();
-            }
         }
     }
 }
